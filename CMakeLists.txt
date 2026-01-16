@@ -12,9 +12,8 @@ set(FRICTION_API_SOCKET "local:friction_api" CACHE STRING "Friction Api Host")
 
 add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
-add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_HOST}")
+add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
 
-option(BUILD_TESTS "Build the test server and client" OFF)
 option(USE_QT6 "Build using Qt 6" OFF)
 
 if(USE_QT6)
@@ -42,15 +41,14 @@ else()
     add_definitions(-DQT_MESSAGELOGCONTEXT)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 set(REP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/api.rep")
 
 if(USE_QT6)
     qt6_re_generate_source(${REP_FILE})
+    qt6_re_generate_replica("${REP_FILE}")
 else()
     qt5_generate_repc(API_SOURCES "${REP_FILE}" SOURCE)
+    qt5_generate_repc(API_REPLICA "${REP_FILE}" REPLICA)
 endif()
 
 set(API_HEADERS include/api_global.h include/api.h)
@@ -59,10 +57,12 @@ if(HAS_DBUS)
     list(APPEND API_HEADERS include/api_dbus.h)
 endif()
 
-add_library(${PROJECT_NAME} SHARED
-    ${API_HEADERS}
-    src/api.cpp
-    ${API_SOURCES}
+add_library(${PROJECT_NAME} SHARED src/api.cpp ${API_HEADERS} ${API_SOURCES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/friction/api>
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
@@ -78,29 +78,68 @@ if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-if(BUILD_TESTS)
-    if(USE_QT6)
-        qt6_re_generate_replica("${REP_FILE}")
-    else()
-        qt5_generate_repc(API_TEST_REPLICA "${REP_FILE}" REPLICA)
-    endif()
+add_executable(${PROJECT_NAME}-server-demo tests/server_main.cpp)
+target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE
+    ${PROJECT_NAME}
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::RemoteObjects
+)
 
-    add_executable(${PROJECT_NAME}-server tests/server_main.cpp)
-    target_link_libraries(${PROJECT_NAME}-server PRIVATE
-        ${PROJECT_NAME}
-        Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::RemoteObjects
+if(HAS_DBUS)
+    target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
+endif()
+
+add_executable(${PROJECT_NAME}-client-demo tests/client_main.cpp ${API_REPLICA})
+target_link_libraries(${PROJECT_NAME}-client-demo PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::RemoteObjects
+)
+
+target_include_directories(${PROJECT_NAME}-client-demo PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+
+    install(TARGETS ${PROJECT_NAME} EXPORT FrictionApiTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+
+    install(FILES
+        include/api.h
+        include/api_global.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api
     )
 
     if(HAS_DBUS)
-        target_link_libraries(${PROJECT_NAME}-server PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
+        install(FILES include/api_dbus.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api)
     endif()
 
-    add_executable(${PROJECT_NAME}-client tests/client_main.cpp ${API_TEST_REPLICA})
-    target_link_libraries(${PROJECT_NAME}-client PRIVATE
-        Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::RemoteObjects
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/rep_api_source.h
+        ${CMAKE_CURRENT_BINARY_DIR}/rep_api_replica.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api
     )
 
-    target_include_directories(${PROJECT_NAME}-client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    install(FILES include/api.rep DESTINATION ${CMAKE_INSTALL_DATADIR}/friction/api)
+
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/FrictionApiConfig.cmake"
+    "include(CMakeFindDependencyMacro)
+    find_dependency(Qt${QT_VERSION_MAJOR}RemoteObjects)
+    if(UNIX AND NOT APPLE)
+        find_dependency(Qt${QT_VERSION_MAJOR}DBus)
+    endif()
+    include(\"\${CMAKE_CURRENT_LIST_DIR}/FrictionApiTargets.cmake\")
+    ")
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/FrictionApiConfig.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FrictionApi
+    )
+
+    install(EXPORT FrictionApiTargets
+        FILE FrictionApiTargets.cmake
+        NAMESPACE Friction::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FrictionApi
+    )
 endif()

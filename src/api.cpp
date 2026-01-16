@@ -13,20 +13,6 @@
 
 using namespace Friction::Api;
 
-#ifdef FRICTION_HAS_DBUS
-Adaptor::Adaptor(Server *parent)
-    : QDBusAbstractAdaptor(parent)
-{
-    connect(parent, SIGNAL(message(QString)),
-            this, SIGNAL(message(QString)));
-}
-
-void Adaptor::testMethod()
-{
-    static_cast<Server*>(parent())->testMethod();
-}
-#endif
-
 Server::Server(QObject *parent)
     : FrictionApiSource(parent)
     , mDBusConnected(false)
@@ -70,3 +56,17 @@ bool Server::isHostConnected() const
 {
     return mHostConnected;
 }
+
+#ifdef FRICTION_HAS_DBUS
+Adaptor::Adaptor(Server *parent)
+    : QDBusAbstractAdaptor(parent)
+{
+    connect(parent, SIGNAL(message(QString)),
+            this, SIGNAL(message(QString)));
+}
+
+void Adaptor::testMethod()
+{
+    static_cast<Server*>(parent())->testMethod();
+}
+#endif
