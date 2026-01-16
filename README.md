@@ -3,6 +3,7 @@
 Friction API and IPC (DBus/QtRO) library .
 
 ```
+mkdir build && cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
 cmake --build .
 cmake --install . --prefix=/path/to/pkg
