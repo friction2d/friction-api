@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     QObject::connect(ptr,
                      &FrictionApiReplica::message,
                      [](const QString &text) {
-        qDebug() << text;
+        qWarning() << text;
         QCoreApplication::quit();
     });
 

@@ -1,0 +1,8 @@
+{
+    "id": "graphics.friction.dummy",
+    "version": 100,
+    "type": "Gui",
+    "author": "Ole-André Rodlie",
+    "description": "Test Plugin for Friction API",
+    "website": "https://friction.graphics"
+}

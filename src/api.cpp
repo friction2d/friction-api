@@ -38,7 +38,7 @@ void Server::setupRemoteObjects()
 {
     mRemoteHost = new QRemoteObjectHost(QUrl(QStringLiteral(FRICTION_API_SOCKET)), this);
     mHostConnected = mRemoteHost->enableRemoting(this);
-    qDebug() << "API: RemoteObjects server status:" << (mHostConnected ? "Online" : "Offline");
+    qDebug() << "API: IPC server status:" << (mHostConnected ? "Online" : "Offline");
 }
 
 void Server::testMethod()

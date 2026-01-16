@@ -1,6 +1,6 @@
 # Friction API
 
-Friction API and IPC (DBus/QtRO) library .
+Friction API, IPC (DBus/QtRO) and Plugin library.
 
 ```
 mkdir build && cd build
@@ -17,6 +17,8 @@ pkg
 │           ├── api_dbus.h
 │           ├── api_global.h
 │           ├── api.h
+│           ├── plugin.h
+│           ├── plugins.h
 │           ├── rep_api_replica.h
 │           └── rep_api_source.h
 ├── lib
@@ -33,5 +35,4 @@ pkg
     └── friction
         └── api
             └── api.rep
-
 ```

@@ -9,10 +9,12 @@ project(frictionapi VERSION 1.0.0 LANGUAGES CXX)
 set(FRICTION_API_ID "graphics.friction.api" CACHE STRING "Friction Api identifier")
 set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api DBus path")
 set(FRICTION_API_SOCKET "local:friction_api" CACHE STRING "Friction Api Host")
+set(FRICTION_API_PLUGIN "graphics.friction.api.Plugin/1.0" CACHE STRING "Friction Api Plugin")
 
 add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
+add_definitions(-DFRICTION_API_PLUGIN="${FRICTION_API_PLUGIN}")
 
 option(USE_QT6 "Build using Qt 6" OFF)
 
@@ -27,7 +29,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core RemoteObjects)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets RemoteObjects)
 
 if(UNIX AND NOT APPLE)
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus)
@@ -51,13 +53,13 @@ else()
     qt5_generate_repc(API_REPLICA "${REP_FILE}" REPLICA)
 endif()
 
-set(API_HEADERS include/api_global.h include/api.h)
+set(API_HEADERS include/api_global.h include/api.h include/plugin.h include/plugins.h)
 
 if(HAS_DBUS)
     list(APPEND API_HEADERS include/api_dbus.h)
 endif()
 
-add_library(${PROJECT_NAME} SHARED src/api.cpp ${API_HEADERS} ${API_SOURCES})
+add_library(${PROJECT_NAME} SHARED src/api.cpp src/plugins.cpp ${API_HEADERS} ${API_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -71,6 +73,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJ
 target_compile_definitions(${PROJECT_NAME} PRIVATE FRICTION_API_LIBRARY)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
 
@@ -82,6 +85,7 @@ add_executable(${PROJECT_NAME}-server-demo tests/server_main.cpp)
 target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE
     ${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
 
@@ -97,18 +101,22 @@ target_link_libraries(${PROJECT_NAME}-client-demo PRIVATE
 
 target_include_directories(${PROJECT_NAME}-client-demo PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+add_subdirectory(tests/dummy-plugin)
+
 if(UNIX AND NOT APPLE)
+    set(FRICTION_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}/friction/plugins")
+    add_definitions(-DFRICTION_PLUGIN_DIR="${CMAKE_INSTALL_PREFIX}/${FRICTION_PLUGIN_DIR}")
     include(GNUInstallDirs)
 
     install(TARGETS ${PROJECT_NAME} EXPORT FrictionApiTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 
     install(FILES
         include/api.h
         include/api_global.h
+        include/plugin.h
+        include/plugins.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api
     )
 
