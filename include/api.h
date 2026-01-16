@@ -13,13 +13,13 @@
 
 namespace Friction::Api
 {
-    class FRICTION_API_EXPORT ApiServer : public FrictionApiSource
+    class FRICTION_API_EXPORT Server : public FrictionApiSource
     {
         Q_OBJECT
         Q_CLASSINFO("D-Bus Interface", FRICTION_API_ID)
 
     public:
-        explicit ApiServer(QObject *parent = nullptr);
+        explicit Server(QObject *parent = nullptr);
 
         bool isDBusConnected() const;
         bool isHostConnected() const;

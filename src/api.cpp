@@ -9,22 +9,25 @@
 #ifdef FRICTION_HAS_DBUS
 #include "api_dbus.h"
 #include <QtDBus/QDBusConnection>
-Friction::Api::ApiAdaptor::ApiAdaptor(ApiServer *parent)
+#endif
+
+using namespace Friction::Api;
+
+#ifdef FRICTION_HAS_DBUS
+Adaptor::Adaptor(Server *parent)
     : QDBusAbstractAdaptor(parent)
 {
     connect(parent, SIGNAL(message(QString)),
             this, SIGNAL(message(QString)));
 }
 
-void Friction::Api::ApiAdaptor::testMethod()
+void Adaptor::testMethod()
 {
-    static_cast<ApiServer*>(parent())->testMethod();
+    static_cast<Server*>(parent())->testMethod();
 }
 #endif
 
-using namespace Friction::Api;
-
-ApiServer::ApiServer(QObject *parent)
+Server::Server(QObject *parent)
     : FrictionApiSource(parent)
     , mDBusConnected(false)
     , mHostConnected(false)
@@ -34,10 +37,10 @@ ApiServer::ApiServer(QObject *parent)
     setupRemoteObjects();
 }
 
-void ApiServer::setupDBus()
+void Server::setupDBus()
 {
 #ifdef FRICTION_HAS_DBUS
-    new ApiAdaptor(this);
+    new Adaptor(this);
     if (QDBusConnection::sessionBus().registerService(FRICTION_API_ID)) {
         mDBusConnected = QDBusConnection::sessionBus().registerObject(FRICTION_API_DBUS_PATH, this);
     }
@@ -45,25 +48,25 @@ void ApiServer::setupDBus()
 #endif
 }
 
-void ApiServer::setupRemoteObjects()
+void Server::setupRemoteObjects()
 {
     mRemoteHost = new QRemoteObjectHost(QUrl(QStringLiteral(FRICTION_API_SOCKET)), this);
     mHostConnected = mRemoteHost->enableRemoting(this);
     qDebug() << "API: RemoteObjects server status:" << (mHostConnected ? "Online" : "Offline");
 }
 
-void ApiServer::testMethod()
+void Server::testMethod()
 {
     qDebug() << "API: testMethod() called";
     emit message(tr("Hello from Friction API!"));
 }
 
-bool ApiServer::isDBusConnected() const
+bool Server::isDBusConnected() const
 {
     return mDBusConnected;
 }
 
-bool ApiServer::isHostConnected() const
+bool Server::isHostConnected() const
 {
     return mHostConnected;
 }

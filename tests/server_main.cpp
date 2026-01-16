@@ -10,7 +10,7 @@ using namespace Friction::Api;
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    ApiServer server(&app);
+    Server server(&app);
 
     qDebug() << "--- Friction API Server Running ---";
     qDebug() << "Socket:" << FRICTION_API_SOCKET;

@@ -14,7 +14,7 @@ add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_HOST}")
 
-option(BUILD_TESTS "Build the test server and client" ON)
+option(BUILD_TESTS "Build the test server and client" OFF)
 option(USE_QT6 "Build using Qt 6" OFF)
 
 if(USE_QT6)
