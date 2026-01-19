@@ -26,6 +26,16 @@ namespace Friction::Api
 
     public Q_SLOTS:
         Q_SCRIPTABLE void testMethod() override;
+        Q_SCRIPTABLE void newProject(const int width,
+                                     const int height,
+                                     const double fps,
+                                     const int start,
+                                     const int end,
+                                     const double r,
+                                     const double g,
+                                     const double b,
+                                     const double a) override;
+        Q_SCRIPTABLE void loadProject(const QString &path) override;
 
     private:
         void setupDBus();

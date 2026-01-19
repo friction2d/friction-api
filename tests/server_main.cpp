@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     qDebug() << "--- Friction API Server Running ---";
     qDebug() << "Socket:" << FRICTION_API_SOCKET;
 
-    QMainWindow win;
+    /*QMainWindow win;
     Plugins manager;
     QString path = QApplication::applicationDirPath() + "/plugins";
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         QWidget* pluginWidget = p->createWidget(&win);
         win.setCentralWidget(pluginWidget);
         win.show();
-    }
+    }*/
 
     return app.exec();
 }

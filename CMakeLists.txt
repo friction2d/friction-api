@@ -59,7 +59,7 @@ if(HAS_DBUS)
     list(APPEND API_HEADERS include/api_dbus.h)
 endif()
 
-add_library(${PROJECT_NAME} SHARED src/api.cpp src/plugins.cpp ${API_HEADERS} ${API_SOURCES})
+add_library(${PROJECT_NAME} SHARED src/api.cpp src/plugins.cpp ${API_HEADERS} ${API_SOURCES} ${REP_FILE})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

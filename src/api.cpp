@@ -47,6 +47,42 @@ void Server::testMethod()
     emit message(tr("Hello from Friction API!"));
 }
 
+void Server::newProject(const int width,
+                        const int height,
+                        const double fps,
+                        const int start,
+                        const int end,
+                        const double r,
+                        const double g,
+                        const double b,
+                        const double a)
+{
+    qDebug() << "API: newProject() called" << width
+                                           << height
+                                           << fps
+                                           << start
+                                           << end
+                                           << r
+                                           << g
+                                           << b
+                                           << a;
+    emit projectCreated(width,
+                        height,
+                        fps,
+                        start,
+                        end,
+                        r,
+                        g,
+                        b,
+                        a);
+}
+
+void Server::loadProject(const QString &path)
+{
+    qDebug() << "API: loadProject() called" << path;
+    emit loadedProject(false, path);
+}
+
 bool Server::isDBusConnected() const
 {
     return mDBusConnected;
@@ -63,10 +99,55 @@ Adaptor::Adaptor(Server *parent)
 {
     connect(parent, SIGNAL(message(QString)),
             this, SIGNAL(message(QString)));
+
+    connect(parent, SIGNAL(projectCreated(int,
+                                          int,
+                                          double,
+                                          int,
+                                          int,
+                                          double,
+                                          double,
+                                          double,
+                                          double)),
+            this, SIGNAL(projectCreated(int,
+                                        int,
+                                        double,
+                                        int,
+                                        int,
+                                        double,
+                                        double,
+                                        double,
+                                        double)));
 }
 
 void Adaptor::testMethod()
 {
     static_cast<Server*>(parent())->testMethod();
+}
+
+void Adaptor::newProject(const int width,
+                         const int height,
+                         const double fps,
+                         const int start,
+                         const int end,
+                         const double r,
+                         const double g,
+                         const double b,
+                         const double a)
+{
+    static_cast<Server*>(parent())->newProject(width,
+                                               height,
+                                               fps,
+                                               start,
+                                               end,
+                                               r,
+                                               g,
+                                               b,
+                                               a);
+}
+
+void Adaptor::loadProject(const QString &path)
+{
+    static_cast<Server*>(parent())->loadProject(path);
 }
 #endif

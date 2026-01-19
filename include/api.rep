@@ -5,5 +5,26 @@
 class FrictionApi {
     SIGNAL(message(const QString &text));
     SLOT(void testMethod());
+    SIGNAL(projectCreated(const int width,
+                          const int height,
+                          const double fps,
+                          const int start,
+                          const int end,
+                          const double r,
+                          const double g,
+                          const double b,
+                          const double a));
+    SLOT(void newProject(const int width,
+                         const int height,
+                         const double fps,
+                         const int start,
+                         const int end,
+                         const double r,
+                         const double g,
+                         const double b,
+                         const double a));
+    SIGNAL(loadedProject(const bool success,
+                         const QString &path));
+    SLOT(void loadProject(const QString &path));
 };
 

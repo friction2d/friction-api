@@ -21,9 +21,30 @@ namespace Friction::Api
 
     public Q_SLOTS:
         void testMethod();
+        void newProject(const int width,
+                        const int height,
+                        const double fps,
+                        const int start,
+                        const int end,
+                        const double r,
+                        const double g,
+                        const double b,
+                        const double a);
+        void loadProject(const QString &path);
 
     Q_SIGNALS:
         void message(const QString &text);
+        void projectCreated(const int width,
+                            const int height,
+                            const double fps,
+                            const int start,
+                            const int end,
+                            const double r,
+                            const double g,
+                            const double b,
+                            const double a);
+        void loadedProject(const bool success,
+                           const QString &path);
     };
 }
 #endif
