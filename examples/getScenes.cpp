@@ -11,15 +11,13 @@
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QRemoteObjectNode repNode;
-    repNode.connectToNode(QUrl(QStringLiteral("local:friction_api")));
+    repNode.connectToNode(QUrl(QStringLiteral("local:graphics.friction.api")));
 
     auto ptr = repNode.acquire<FrictionApiReplica>();
     QObject::connect(ptr, &FrictionApiReplica::initialized,
                      [ptr, &app]() {
         qWarning() << "--- Connected to Friction Server ---";
-
         const QList<Scene> list = ptr->scenes();
-
         qWarning() << "Total Scenes:" << list.size();
         for (const auto &s : list) {
             qWarning() << " -> ID:" << s.id() << "Title:" << s.title();

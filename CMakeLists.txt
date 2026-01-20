@@ -6,9 +6,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(frictionapi VERSION 1.0.0 LANGUAGES CXX)
 
-set(FRICTION_API_ID "graphics.friction.api" CACHE STRING "Friction Api identifier")
-set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api DBus path")
-set(FRICTION_API_SOCKET "local:friction_api" CACHE STRING "Friction Api Host")
+set(FRICTION_API_ID "graphics.friction.api" CACHE STRING "Friction Api Identifier")
+set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api D-Bus Path")
+set(FRICTION_API_SOCKET "local:graphics.friction.api" CACHE STRING "Friction Api Socket")
 set(FRICTION_API_PLUGIN "graphics.friction.api.Plugin/1.0" CACHE STRING "Friction Api Plugin")
 
 add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
@@ -16,7 +16,7 @@ add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
 add_definitions(-DFRICTION_API_PLUGIN="${FRICTION_API_PLUGIN}")
 
-option(USE_QT6 "Build using Qt 6" OFF)
+option(USE_QT6 "Build using Qt 6" OFF) # untested
 
 if(USE_QT6)
     set(QT_VERSION_MAJOR 6)
@@ -53,11 +53,7 @@ else()
     qt5_generate_repc(API_REPLICA "${REP_FILE}" REPLICA)
 endif()
 
-set(API_HEADERS include/api_global.h include/api.h)
-
-if(HAS_DBUS)
-    list(APPEND API_HEADERS include/api_dbus.h)
-endif()
+set(API_HEADERS include/api_global.h include/api_dbus.h include/api.h)
 
 add_library(${PROJECT_NAME} SHARED src/api.cpp src/api_dbus.cpp ${API_HEADERS} ${API_SOURCES} ${REP_FILE})
 
@@ -91,13 +87,13 @@ if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-add_executable(${PROJECT_NAME}-client-demo tests/client_main.cpp ${API_REPLICA})
-target_link_libraries(${PROJECT_NAME}-client-demo PRIVATE
+add_executable(${PROJECT_NAME}-getScenes examples/getScenes.cpp ${API_REPLICA})
+target_link_libraries(${PROJECT_NAME}-getScenes PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
 
-target_include_directories(${PROJECT_NAME}-client-demo PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(${PROJECT_NAME}-getScenes PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # add_subdirectory(tests/dummy-plugin)
 
