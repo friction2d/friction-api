@@ -13,29 +13,19 @@
 
 namespace Friction::Api
 {
-    class FRICTION_API_EXPORT Server : public FrictionApiSource
+    class FRICTION_API_EXPORT Server : public FrictionApiSimpleSource
     {
         Q_OBJECT
-        Q_CLASSINFO("D-Bus Interface", FRICTION_API_ID)
 
     public:
         explicit Server(QObject *parent = nullptr);
 
         bool isDBusConnected() const;
         bool isHostConnected() const;
+        bool isConnected() const;
 
-    public Q_SLOTS:
-        Q_SCRIPTABLE void testMethod() override;
-        Q_SCRIPTABLE void newProject(const int width,
-                                     const int height,
-                                     const double fps,
-                                     const int start,
-                                     const int end,
-                                     const double r,
-                                     const double g,
-                                     const double b,
-                                     const double a) override;
-        Q_SCRIPTABLE void loadProject(const QString &path) override;
+        void setScenes(const QList<Scene> &scenes);
+        void setCurrentScene(const int id);
 
     private:
         void setupDBus();

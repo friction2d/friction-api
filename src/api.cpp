@@ -14,11 +14,19 @@
 using namespace Friction::Api;
 
 Server::Server(QObject *parent)
-    : FrictionApiSource(parent)
+    : FrictionApiSimpleSource(parent)
     , mDBusConnected(false)
     , mHostConnected(false)
     , mRemoteHost(nullptr)
 {
+    // add dummy data
+    QList<Scene> initialScenes;
+    initialScenes << Scene(0, "Scene 0")
+                  << Scene(1, "Scene 1")
+                  << Scene(2, "Scene 2");
+    FrictionApiSimpleSource::setScenes(initialScenes);
+    FrictionApiSimpleSource::setCurrentScene(0);
+
     setupDBus();
     setupRemoteObjects();
 }
@@ -41,48 +49,6 @@ void Server::setupRemoteObjects()
     qDebug() << "API: IPC server status:" << (mHostConnected ? "Online" : "Offline");
 }
 
-void Server::testMethod()
-{
-    qDebug() << "API: testMethod() called";
-    emit message(tr("Hello from Friction API!"));
-}
-
-void Server::newProject(const int width,
-                        const int height,
-                        const double fps,
-                        const int start,
-                        const int end,
-                        const double r,
-                        const double g,
-                        const double b,
-                        const double a)
-{
-    qDebug() << "API: newProject() called" << width
-                                           << height
-                                           << fps
-                                           << start
-                                           << end
-                                           << r
-                                           << g
-                                           << b
-                                           << a;
-    emit projectCreated(width,
-                        height,
-                        fps,
-                        start,
-                        end,
-                        r,
-                        g,
-                        b,
-                        a);
-}
-
-void Server::loadProject(const QString &path)
-{
-    qDebug() << "API: loadProject() called" << path;
-    emit loadedProject(false, path);
-}
-
 bool Server::isDBusConnected() const
 {
     return mDBusConnected;
@@ -93,61 +59,17 @@ bool Server::isHostConnected() const
     return mHostConnected;
 }
 
-#ifdef FRICTION_HAS_DBUS
-Adaptor::Adaptor(Server *parent)
-    : QDBusAbstractAdaptor(parent)
+bool Server::isConnected() const
 {
-    connect(parent, SIGNAL(message(QString)),
-            this, SIGNAL(message(QString)));
-
-    connect(parent, SIGNAL(projectCreated(int,
-                                          int,
-                                          double,
-                                          int,
-                                          int,
-                                          double,
-                                          double,
-                                          double,
-                                          double)),
-            this, SIGNAL(projectCreated(int,
-                                        int,
-                                        double,
-                                        int,
-                                        int,
-                                        double,
-                                        double,
-                                        double,
-                                        double)));
+    return mDBusConnected || mHostConnected;
 }
 
-void Adaptor::testMethod()
+void Server::setScenes(const QList<Scene> &scenes)
 {
-    static_cast<Server*>(parent())->testMethod();
+    FrictionApiSimpleSource::setScenes(scenes);
 }
 
-void Adaptor::newProject(const int width,
-                         const int height,
-                         const double fps,
-                         const int start,
-                         const int end,
-                         const double r,
-                         const double g,
-                         const double b,
-                         const double a)
+void Server::setCurrentScene(const int id)
 {
-    static_cast<Server*>(parent())->newProject(width,
-                                               height,
-                                               fps,
-                                               start,
-                                               end,
-                                               r,
-                                               g,
-                                               b,
-                                               a);
+    FrictionApiSimpleSource::setCurrentScene(id);
 }
-
-void Adaptor::loadProject(const QString &path)
-{
-    static_cast<Server*>(parent())->loadProject(path);
-}
-#endif

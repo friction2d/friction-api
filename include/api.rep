@@ -2,29 +2,14 @@
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
-class FrictionApi {
-    SIGNAL(message(const QString &text));
-    SLOT(void testMethod());
-    SIGNAL(projectCreated(const int width,
-                          const int height,
-                          const double fps,
-                          const int start,
-                          const int end,
-                          const double r,
-                          const double g,
-                          const double b,
-                          const double a));
-    SLOT(void newProject(const int width,
-                         const int height,
-                         const double fps,
-                         const int start,
-                         const int end,
-                         const double r,
-                         const double g,
-                         const double b,
-                         const double a));
-    SIGNAL(loadedProject(const bool success,
-                         const QString &path));
-    SLOT(void loadProject(const QString &path));
-};
+#include <QString>
+#include <QList>
 
+POD Scene(int id, QString title)
+
+class FrictionApi {
+    PROP(QList<Scene> scenes READONLY);
+    PROP(int currentScene READONLY);
+
+    SIGNAL(message(const QString &text));
+};

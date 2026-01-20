@@ -7,9 +7,36 @@
 
 #ifdef FRICTION_HAS_DBUS
 #include <QtDBus/QDBusAbstractAdaptor>
+#include <QtDBus/QDBusArgument>
+#include <QList>
+#include <QString>
 
 namespace Friction::Api
 {
+    struct DBusScene
+    {
+        int id;
+        QString title;
+
+        friend QDBusArgument &operator<<(QDBusArgument &arg,
+                                         const DBusScene &scene)
+        {
+            arg.beginStructure();
+            arg << scene.id << scene.title;
+            arg.endStructure();
+            return arg;
+        }
+
+        friend const QDBusArgument &operator>>(const QDBusArgument &arg,
+                                               DBusScene &scene)
+        {
+            arg.beginStructure();
+            arg >> scene.id >> scene.title;
+            arg.endStructure();
+            return arg;
+        }
+    };
+
     class Server;
     class Adaptor : public QDBusAbstractAdaptor
     {
@@ -20,33 +47,19 @@ namespace Friction::Api
         explicit Adaptor(Server *parent);
 
     public Q_SLOTS:
-        void testMethod();
-        void newProject(const int width,
-                        const int height,
-                        const double fps,
-                        const int start,
-                        const int end,
-                        const double r,
-                        const double g,
-                        const double b,
-                        const double a);
-        void loadProject(const QString &path);
+        QList<Friction::Api::DBusScene> getScenes();
+        int getCurrentScene();
+        bool setCurrentScene(const int id);
 
     Q_SIGNALS:
         void message(const QString &text);
-        void projectCreated(const int width,
-                            const int height,
-                            const double fps,
-                            const int start,
-                            const int end,
-                            const double r,
-                            const double g,
-                            const double b,
-                            const double a);
-        void loadedProject(const bool success,
-                           const QString &path);
+        void scenesChanged();
+        void currentSceneChanged(const int id);
     };
 }
-#endif
 
+Q_DECLARE_METATYPE(Friction::Api::DBusScene)
+Q_DECLARE_METATYPE(QList<Friction::Api::DBusScene>)
+
+#endif // FRICTION_HAS_DBUS
 #endif // FRICTION_API_DBUS_H
