@@ -9,12 +9,10 @@ project(frictionapi VERSION 1.0.0 LANGUAGES CXX)
 set(FRICTION_API_ID "graphics.friction.api" CACHE STRING "Friction Api Identifier")
 set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api D-Bus Path")
 set(FRICTION_API_SOCKET "local:graphics.friction.api" CACHE STRING "Friction Api Socket")
-set(FRICTION_API_PLUGIN "graphics.friction.api.Plugin/1.0" CACHE STRING "Friction Api Plugin")
 
 add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
-add_definitions(-DFRICTION_API_PLUGIN="${FRICTION_API_PLUGIN}")
 
 option(USE_QT6 "Build using Qt 6" OFF) # untested
 
@@ -95,11 +93,7 @@ target_link_libraries(${PROJECT_NAME}-getScenes PRIVATE
 
 target_include_directories(${PROJECT_NAME}-getScenes PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-# add_subdirectory(tests/dummy-plugin)
-
 if(UNIX AND NOT APPLE)
-    # set(FRICTION_PLUGIN_DIR "${CMAKE_INSTALL_LIBDIR}/friction/plugins")
-    # add_definitions(-DFRICTION_PLUGIN_DIR="${CMAKE_INSTALL_PREFIX}/${FRICTION_PLUGIN_DIR}")
     include(GNUInstallDirs)
 
     install(TARGETS ${PROJECT_NAME} EXPORT FrictionApiTargets
@@ -109,8 +103,6 @@ if(UNIX AND NOT APPLE)
     install(FILES
         include/api.h
         include/api_global.h
-        # include/plugin.h
-        # include/plugins.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api
     )
 
