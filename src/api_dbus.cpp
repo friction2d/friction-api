@@ -1,4 +1,4 @@
-// Part of Friction <https://friction.graphics>
+// Friction API <https://friction.graphics>
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,6 +13,7 @@ using namespace Friction::Api;
 Adaptor::Adaptor(Server *parent)
     : QDBusAbstractAdaptor(parent)
 {
+    qDBusRegisterMetaType<DBusRange>();
     qDBusRegisterMetaType<DBusScene>();
     qDBusRegisterMetaType<QList<DBusScene>>();
 
@@ -50,11 +51,20 @@ QList<DBusScene> Adaptor::getScenes()
     if (srv) {
         const auto scenesList = srv->scenes();
         for (const auto &s : scenesList) {
-            DBusScene ds{s.id(), s.title()};
+            DBusRange dr{s.range().first(),
+                         s.range().last()};
+            DBusScene ds;
+            ds.id = s.id();
+            ds.title = s.title();
+            ds.width = s.width();
+            ds.height = s.height();
+            ds.fps = s.fps();
+            ds.range = dr;
+
             result.append(ds);
         }
     }
     return result;
 }
 
-#endif
+#endif // FRICTION_HAS_DBUS

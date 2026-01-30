@@ -1,4 +1,4 @@
-# Part of Friction <https://friction.graphics>
+# Friction API <https://friction.graphics>
 # SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -6,11 +6,11 @@ cmake_minimum_required(VERSION 3.16)
 
 project(frictionapi VERSION 1.0.0 LANGUAGES CXX)
 
-set(FRICTION_API_ID "graphics.friction.api" CACHE STRING "Friction Api Identifier")
+set(FRICTION_API_DBUS_ID "graphics.friction.api" CACHE STRING "Friction Api Identifier")
 set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api D-Bus Path")
 set(FRICTION_API_SOCKET "local:graphics.friction.api" CACHE STRING "Friction Api Socket")
 
-add_definitions(-DFRICTION_API_ID="${FRICTION_API_ID}")
+add_definitions(-DFRICTION_API_DBUS_ID="${FRICTION_API_DBUS_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
 
@@ -74,24 +74,24 @@ if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-add_executable(${PROJECT_NAME}-server-demo tests/server_main.cpp)
-target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE
+add_executable(${PROJECT_NAME}-server examples/server.cpp)
+target_link_libraries(${PROJECT_NAME}-server PRIVATE
     ${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
 
 if(HAS_DBUS)
-    target_link_libraries(${PROJECT_NAME}-server-demo PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
+    target_link_libraries(${PROJECT_NAME}-server PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-add_executable(${PROJECT_NAME}-getScenes examples/getScenes.cpp ${API_REPLICA})
-target_link_libraries(${PROJECT_NAME}-getScenes PRIVATE
+add_executable(${PROJECT_NAME}-client examples/client.cpp ${API_REPLICA})
+target_link_libraries(${PROJECT_NAME}-client PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
 
-target_include_directories(${PROJECT_NAME}-getScenes PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(${PROJECT_NAME}-client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(UNIX AND NOT APPLE)
     include(GNUInstallDirs)

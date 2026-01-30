@@ -1,4 +1,4 @@
-// Part of Friction <https://friction.graphics>
+// Friction API <https://friction.graphics>
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -24,8 +24,8 @@ namespace Friction::Api
         bool isHostConnected() const;
         bool isConnected() const;
 
-        void setScenes(const QList<Scene> &scenes);
-        void setCurrentScene(const int id);
+        void setScenes(QList<fScene> scenes) override;
+        void setCurrentScene(const int id) override;
 
     private:
         void setupDBus();

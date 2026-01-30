@@ -1,15 +1,24 @@
-// Part of Friction <https://friction.graphics>
+// Friction API <https://friction.graphics>
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <QString>
 #include <QList>
 
-POD Scene(int id, QString title)
+POD fRange(int first,
+           int last)
 
-class FrictionApi {
-    PROP(QList<Scene> scenes READONLY);
-    PROP(int currentScene READONLY);
+POD fScene(int id,
+           QString title,
+           int width,
+           int height,
+           double fps,
+           fRange range)
+
+class FrictionApi
+{
+    PROP(QList<fScene> scenes);
+    PROP(int currentScene);
 
     SIGNAL(message(const QString &text));
 };

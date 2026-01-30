@@ -1,4 +1,4 @@
-// Part of Friction <https://friction.graphics>
+// Friction API <https://friction.graphics>
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,16 +13,49 @@
 
 namespace Friction::Api
 {
+    struct DBusRange
+    {
+        int first;
+        int last;
+
+        friend QDBusArgument &operator<<(QDBusArgument &arg,
+                                         const DBusRange &range)
+        {
+            arg.beginStructure();
+            arg << range.first << range.last;
+            arg.endStructure();
+            return arg;
+        }
+
+        friend const QDBusArgument &operator>>(const QDBusArgument &arg,
+                                               DBusRange &range)
+        {
+            arg.beginStructure();
+            arg >> range.first >> range.last;
+            arg.endStructure();
+            return arg;
+        }
+    };
+
     struct DBusScene
     {
         int id;
         QString title;
+        int width;
+        int height;
+        double fps;
+        DBusRange range;
 
         friend QDBusArgument &operator<<(QDBusArgument &arg,
                                          const DBusScene &scene)
         {
             arg.beginStructure();
-            arg << scene.id << scene.title;
+            arg << scene.id
+                << scene.title
+                << scene.width
+                << scene.height
+                << scene.fps
+                << scene.range;
             arg.endStructure();
             return arg;
         }
@@ -31,7 +64,12 @@ namespace Friction::Api
                                                DBusScene &scene)
         {
             arg.beginStructure();
-            arg >> scene.id >> scene.title;
+            arg >> scene.id
+                >> scene.title
+                >> scene.width
+                >> scene.height
+                >> scene.fps
+                >> scene.range;
             arg.endStructure();
             return arg;
         }
@@ -41,7 +79,8 @@ namespace Friction::Api
     class Adaptor : public QDBusAbstractAdaptor
     {
         Q_OBJECT
-        Q_CLASSINFO("D-Bus Interface", FRICTION_API_ID)
+        Q_CLASSINFO("D-Bus Interface",
+                    FRICTION_API_DBUS_ID)
 
     public:
         explicit Adaptor(Server *parent);
@@ -58,8 +97,10 @@ namespace Friction::Api
     };
 }
 
+Q_DECLARE_METATYPE(Friction::Api::DBusRange)
 Q_DECLARE_METATYPE(Friction::Api::DBusScene)
 Q_DECLARE_METATYPE(QList<Friction::Api::DBusScene>)
 
 #endif // FRICTION_HAS_DBUS
+
 #endif // FRICTION_API_DBUS_H
