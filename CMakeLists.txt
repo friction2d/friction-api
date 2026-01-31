@@ -55,11 +55,9 @@ endif()
 
 set(API_HEADERS
     include/api_global.h
-    include/adaptor.h
     include/host.h)
 
 add_library(${PROJECT_NAME} SHARED
-            src/adaptor.cpp
             src/host.cpp
             ${API_HEADERS}
             ${API_SOURCES}
@@ -84,34 +82,25 @@ if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
+# server/host demo (QtRO/DBus/JSON Socket)
 add_executable(${PROJECT_NAME}-server examples/server.cpp)
 target_link_libraries(${PROJECT_NAME}-server PRIVATE
     ${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
-
 if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME}-server PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
-add_executable(${PROJECT_NAME}-bridge src/bridge_main.cpp include/bridge.h src/bridge.cpp ${API_REPLICA})
-target_link_libraries(${PROJECT_NAME}-bridge PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::RemoteObjects
-)
-target_include_directories(${PROJECT_NAME}-bridge PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
-
+# client demo (QtRO)
+# see examples/ for other demos
 add_executable(${PROJECT_NAME}-client examples/client.cpp ${API_REPLICA})
+target_include_directories(${PROJECT_NAME}-client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(${PROJECT_NAME}-client PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::RemoteObjects
 )
-
-target_include_directories(${PROJECT_NAME}-client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(UNIX AND NOT APPLE)
     include(GNUInstallDirs)
@@ -121,7 +110,6 @@ if(UNIX AND NOT APPLE)
     )
 
     install(FILES
-        include/bridge.h
         include/host.h
         include/api_global.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api

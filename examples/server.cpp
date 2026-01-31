@@ -7,7 +7,6 @@
 #include <QCoreApplication>
 
 #ifdef FRICTION_HAS_DBUS
-#include "adaptor.h"
 #include <QtDBus>
 #endif
 
@@ -24,6 +23,7 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
     Host host(&app,
               FRICTION_API_SOCKET,
+              FRICTION_API_BRIDGE,
               FRICTION_API_DBUS_ID,
               FRICTION_API_DBUS_PATH);
 
