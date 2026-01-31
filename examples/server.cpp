@@ -6,26 +6,12 @@
 
 #include <QCoreApplication>
 
-#ifdef FRICTION_HAS_DBUS
-#include <QtDBus>
-#endif
-
 using namespace Friction::Api;
 
 int main(int argc, char *argv[])
 {
-#ifdef FRICTION_HAS_DBUS
-    qDBusRegisterMetaType<DBusRange>();
-    qDBusRegisterMetaType<DBusScene>();
-    qDBusRegisterMetaType<QList<DBusScene>>();
-#endif
-
     QCoreApplication app(argc, argv);
-    Host host(&app,
-              FRICTION_API_SOCKET,
-              FRICTION_API_BRIDGE,
-              FRICTION_API_DBUS_ID,
-              FRICTION_API_DBUS_PATH);
+    Host host(&app);
 
     qWarning() << "Adding dummy data";
     QList<fScene> initialScenes;
