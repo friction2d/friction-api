@@ -13,12 +13,15 @@
 
 namespace Friction::Api
 {
-    class FRICTION_API_EXPORT Server : public FrictionApiSimpleSource
+    class FRICTION_API_EXPORT Host : public FrictionApiSimpleSource
     {
         Q_OBJECT
 
     public:
-        explicit Server(QObject *parent = nullptr);
+        explicit Host(QObject *parent = nullptr,
+                      const QString &socketName = FRICTION_API_SOCKET,
+                      const QString &sessionName = FRICTION_API_DBUS_ID,
+                      const QString &sessionPath = FRICTION_API_DBUS_PATH);
 
         bool isDBusConnected() const;
         bool isHostConnected() const;
@@ -28,8 +31,9 @@ namespace Friction::Api
         void setCurrentScene(const int id) override;
 
     private:
-        void setupDBus();
-        void setupRemoteObjects();
+        void setupDBus(const QString &sessionName,
+                       const QString &sessionPath);
+        void setupRemoteObjects(const QString &socketName);
 
         bool mDBusConnected;
         bool mHostConnected;

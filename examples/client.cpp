@@ -14,12 +14,12 @@
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
-    QRemoteObjectNode socket;
-    socket.connectToNode(QUrl(QStringLiteral("local:graphics.friction.api")));
-    auto replica = socket.acquire<FrictionApiReplica>();
+    QRemoteObjectNode node;
+    node.connectToNode(QUrl(QStringLiteral(FRICTION_API_SOCKET)));
+    auto replica = node.acquire<FrictionApiReplica>();
     QObject::connect(replica, &FrictionApiReplica::initialized,
                      [replica, &app]() {
-        qWarning() << "--- Connected to Friction Server ---";
+        qWarning() << "--- Connected to Friction Host ---";
 
         qWarning() << "Scenes:";
         for (const auto &s : replica->scenes()) {
@@ -31,6 +31,27 @@ int main(int argc, char *argv[]) {
                        << "Start Frame:" << s.range().first()
                        << "End Frame:" << s.range().last();
         }
+
+        /*
+        QObject::connect(replica, &FrictionApiReplica::scenesChanged,
+                         [replica](QList<fScene> scenes){
+            qDebug() << "Scenes Changed:";
+            for (const auto &s : scenes) {
+                qWarning() << "--> ID:" << s.id()
+                << "Title:" << s.title()
+                << "Width:" << s.width()
+                << "Height:" << s.height()
+                << "Fps:" << s.fps()
+                << "Start Frame:" << s.range().first()
+                << "End Frame:" << s.range().last();
+            }
+        });
+        QList<fScene> initialScenes;
+        initialScenes << fScene(01, "Scene 0", 1920, 1080, 30, fRange{0, 299})
+                      << fScene(122, "Scene 1", 1920, 1080, 30, fRange{0, 299})
+                      << fScene(2, "Scene 2", 1920, 1080, 30, fRange{0, 299});
+        replica->pushScenes(initialScenes);
+        */
 
         QTimer::singleShot(1000, &app,
                            &QCoreApplication::quit);

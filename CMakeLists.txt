@@ -9,10 +9,12 @@ project(frictionapi VERSION 1.0.0 LANGUAGES CXX)
 set(FRICTION_API_DBUS_ID "graphics.friction.api" CACHE STRING "Friction Api Identifier")
 set(FRICTION_API_DBUS_PATH "/friction/api" CACHE STRING "Friction Api D-Bus Path")
 set(FRICTION_API_SOCKET "local:graphics.friction.api" CACHE STRING "Friction Api Socket")
+set(FRICTION_API_BRIDGE "graphics.friction.api.bridge" CACHE STRING "Friction Api Bridge")
 
 add_definitions(-DFRICTION_API_DBUS_ID="${FRICTION_API_DBUS_ID}")
 add_definitions(-DFRICTION_API_DBUS_PATH="${FRICTION_API_DBUS_PATH}")
 add_definitions(-DFRICTION_API_SOCKET="${FRICTION_API_SOCKET}")
+add_definitions(-DFRICTION_API_BRIDGE="${FRICTION_API_BRIDGE}")
 
 option(USE_QT6 "Build using Qt 6" OFF) # untested
 
@@ -51,9 +53,17 @@ else()
     qt5_generate_repc(API_REPLICA "${REP_FILE}" REPLICA)
 endif()
 
-set(API_HEADERS include/api_global.h include/api_dbus.h include/api.h)
+set(API_HEADERS
+    include/api_global.h
+    include/adaptor.h
+    include/host.h)
 
-add_library(${PROJECT_NAME} SHARED src/api.cpp src/api_dbus.cpp ${API_HEADERS} ${API_SOURCES} ${REP_FILE})
+add_library(${PROJECT_NAME} SHARED
+            src/adaptor.cpp
+            src/host.cpp
+            ${API_HEADERS}
+            ${API_SOURCES}
+            ${REP_FILE})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -85,6 +95,16 @@ if(HAS_DBUS)
     target_link_libraries(${PROJECT_NAME}-server PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
 endif()
 
+add_executable(${PROJECT_NAME}-bridge src/bridge_main.cpp include/bridge.h src/bridge.cpp ${API_REPLICA})
+target_link_libraries(${PROJECT_NAME}-bridge PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::RemoteObjects
+)
+target_include_directories(${PROJECT_NAME}-bridge PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 add_executable(${PROJECT_NAME}-client examples/client.cpp ${API_REPLICA})
 target_link_libraries(${PROJECT_NAME}-client PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
@@ -101,13 +121,14 @@ if(UNIX AND NOT APPLE)
     )
 
     install(FILES
-        include/api.h
+        include/bridge.h
+        include/host.h
         include/api_global.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api
     )
 
     if(HAS_DBUS)
-        install(FILES include/api_dbus.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api)
+        install(FILES include/adaptor.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/friction/api)
     endif()
 
     install(FILES

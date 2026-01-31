@@ -75,7 +75,7 @@ namespace Friction::Api
         }
     };
 
-    class Server;
+    class Host;
     class Adaptor : public QDBusAbstractAdaptor
     {
         Q_OBJECT
@@ -83,7 +83,7 @@ namespace Friction::Api
                     FRICTION_API_DBUS_ID)
 
     public:
-        explicit Adaptor(Server *parent);
+        explicit Adaptor(Host *parent);
 
     public Q_SLOTS:
         QList<Friction::Api::DBusScene> getScenes();

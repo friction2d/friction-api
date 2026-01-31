@@ -4,30 +4,31 @@
 
 #ifdef FRICTION_HAS_DBUS
 
-#include "api_dbus.h"
-#include "api.h"
+#include "adaptor.h"
+#include "host.h"
+
 #include <QtDBus/QDBusMetaType>
 
 using namespace Friction::Api;
 
-Adaptor::Adaptor(Server *parent)
+Adaptor::Adaptor(Host *parent)
     : QDBusAbstractAdaptor(parent)
 {
     qDBusRegisterMetaType<DBusRange>();
     qDBusRegisterMetaType<DBusScene>();
     qDBusRegisterMetaType<QList<DBusScene>>();
 
-    connect(parent, &Server::message,
+    connect(parent, &Host::message,
             this, &Adaptor::message);
-    connect(parent, &Server::scenesChanged,
+    connect(parent, &Host::scenesChanged,
             this, &Adaptor::scenesChanged);
-    connect(parent, &Server::currentSceneChanged,
+    connect(parent, &Host::currentSceneChanged,
             this, &Adaptor::currentSceneChanged);
 }
 
 int Adaptor::getCurrentScene()
 {
-    Server *srv = qobject_cast<Server*>(parent());
+    Host *srv = qobject_cast<Host*>(parent());
     if (srv) {
         return srv->currentScene();
     }
@@ -36,7 +37,7 @@ int Adaptor::getCurrentScene()
 
 bool Adaptor::setCurrentScene(const int id)
 {
-    Server *srv = qobject_cast<Server*>(parent());
+    Host *srv = qobject_cast<Host*>(parent());
     if (srv) {
         srv->setCurrentScene(id);
         return srv->currentScene() == id;
@@ -47,7 +48,7 @@ bool Adaptor::setCurrentScene(const int id)
 QList<DBusScene> Adaptor::getScenes()
 {
     QList<DBusScene> result;
-    Server *srv = qobject_cast<Server*>(parent());
+    Host *srv = qobject_cast<Host*>(parent());
     if (srv) {
         const auto scenesList = srv->scenes();
         for (const auto &s : scenesList) {

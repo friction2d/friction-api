@@ -2,12 +2,12 @@
 // SPDX-FileCopyrightText: Copyright (c) Ole-André Rodlie and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "api.h"
+#include "host.h"
 
 #include <QCoreApplication>
 
 #ifdef FRICTION_HAS_DBUS
-#include "api_dbus.h"
+#include "adaptor.h"
 #include <QtDBus>
 #endif
 
@@ -22,19 +22,18 @@ int main(int argc, char *argv[])
 #endif
 
     QCoreApplication app(argc, argv);
+    Host host(&app,
+              FRICTION_API_SOCKET,
+              FRICTION_API_DBUS_ID,
+              FRICTION_API_DBUS_PATH);
 
-    qDebug() << "--- Friction Server Running ---";
-    qDebug() << "Socket:" << FRICTION_API_SOCKET;
-
-    Server server(&app);
-
-    qDebug() << "Adding dummy data";
+    qWarning() << "Adding dummy data";
     QList<fScene> initialScenes;
     initialScenes << fScene(0, "Scene 0", 1920, 1080, 30, fRange{0, 299})
                   << fScene(1, "Scene 1", 1920, 1080, 30, fRange{0, 299})
                   << fScene(2, "Scene 2", 1920, 1080, 30, fRange{0, 299});
-    server.setScenes(initialScenes);
-    server.setCurrentScene(0);
+    host.setScenes(initialScenes);
+    host.setCurrentScene(0);
 
     return app.exec();
 }
