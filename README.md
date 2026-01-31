@@ -1,10 +1,28 @@
-# Friction API *(draft mode)*
+# Friction API Specification
 
-Friction API using DBus, QtRO (RemoteObjects) and Socket (with JSON response).
+**This API is currently a Proof of Concept. A stable, first version is scheduled for release in 2026. All code examples work, but the API calls/names are just for testing.**
 
-## Examples
+The Friction API is built on a "Single Source, Multiple Channels" architecture. It utilizes Qt Remote Objects (QtRO) as its core engine, with specialized adapters for DBus and an integrated JSON-RPC Bridge via QLocalServer.
 
-Client examples, check the `examples/` folder.
+By leveraging QtRO as the primary source of truth, Friction ensures that state synchronization and method calls are handled atomically.
+
+### Why three different interfaces?
+
+To support a diverse ecosystem the API provides protocol-specific access points:
+
+* **Qt Remote Objects (Native Qt IPC)**
+  * High-performance, low-latency communication between Qt-based applications
+  * Native support for Plain Old Data (POD) types, automated signal/slot synchronization, and seamless cross-platform performance (Linux, macOS, Windows)
+* **DBus (System Integration)**
+  * Standardized Inter-Process Communication (IPC) for Linux and BSD environments
+  * Allows to integrate deeply with desktop environments, system services, and existing automation tools
+* **JSON Bridge via QLocalServer (Universal/Failsafe)**
+  * Language-agnostic, universal access
+  * Enables tools to control Friction via standard Unix Domain Sockets (or Named Pipes on Windows). The use of JSON-RPC 2.0 eliminates the need for complex library dependencies or specific Qt runtimes
+
+## Client Examples
+
+Check the `examples/` folder for various examples.
 
 ### DBus (dbus-send)
 
@@ -22,7 +40,7 @@ iface = dbus.Interface(obj, "graphics.friction.api")
 print(iface.getScenes())
 ```
 
-### QtRO (RemoteObjects)
+### Qt Remote Objects (C++)
 
 ```cpp
 #include "rep_api_replica.h"
@@ -51,7 +69,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-### Socket (Python)
+### JSON-RPC Bridge (Python)
 
 ```python
 from friction_api import FrictionClient
